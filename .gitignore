@@ -1,0 +1,6 @@
+tmp/
+
+# .env files
+.env
+.env.*
+  
