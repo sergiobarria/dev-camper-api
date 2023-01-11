@@ -1,0 +1,6 @@
+# Global API config
+server:
+  port: 1337
+database:
+  mongo_uri: ${MONGO_URI}
+  name: ${DATABASE_NAME}
