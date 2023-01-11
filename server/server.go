@@ -23,6 +23,45 @@ func ListenAndServe() {
 		return c.String(200, "OK")
 	})
 
+	// Bootcamps routes
+	g.GET("/bootcamps", nil)
+	g.GET("/bootcamps/:id", nil)
+	g.POST("/bootcamps", nil)
+	g.PUT("/bootcamps/:id", nil)
+	g.DELETE("/bootcamps/:id", nil)
+
+	// Courses routes
+	g.GET("/courses", nil)
+	g.GET("/courses/:id", nil)
+	g.POST("/courses", nil)
+	g.PUT("/courses/:id", nil)
+	g.DELETE("/courses/:id", nil)
+
+	// Auth routes
+	g.POST("/auth/register", nil)
+	g.POST("/auth/login", nil)
+	g.GET("/auth/me", nil)
+	g.GET("/auth/logout", nil)
+	g.POST("/auth/forgot-password", nil)
+	g.PUT("/auth/update-password", nil)
+	g.PUT("/auth/reset-password/:resettoken", nil)
+	g.GET("/auth/confirm-email", nil)
+	g.PUT("/auth/update-details", nil)
+
+	// Users routes
+	g.GET("/users", nil)
+	g.GET("/users/:id", nil)
+	g.POST("/users", nil)
+	g.PUT("/users/:id", nil)
+	g.DELETE("/users/:id", nil)
+
+	// Reviews routes
+	g.GET("/reviews", nil)
+	g.GET("/reviews/:id", nil)
+	g.POST("/reviews", nil)
+	g.PUT("/reviews/:id", nil)
+	g.DELETE("/reviews/:id", nil)
+
 	// start the server
 	port := viper.GetString("port") // get the port from the global config
 	if port == "" {
