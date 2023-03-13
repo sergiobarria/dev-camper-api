@@ -2,6 +2,7 @@ import dotenv from 'dotenv'
 import config from 'config'
 
 import { createServer } from './app'
+import { connectToMongoDB } from './utils'
 
 dotenv.config()
 
@@ -9,6 +10,9 @@ const app = createServer()
 
 async function main(): Promise<void> {
     const PORT = config.get<number>('PORT')
+
+    // Connect to MongoDB
+    await connectToMongoDB(app)
 
     try {
         app.listen({ port: PORT }, (err, address) => {

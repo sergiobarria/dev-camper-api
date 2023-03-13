@@ -4,9 +4,12 @@
     "description": "> Backend API for DevCamper application built with Fastify, MongoDB, Mongoose and more",
     "main": "server.ts",
     "scripts": {
+        "docker:up": "docker-compose up -d",
+        "docker:down": "docker-compose down",
+        "docker:logs": "docker-compose logs -f",
         "build": "rimraf dist && swc ./src ./config -d dist",
         "start": "node dist/server.js NODE_ENV=production",
-        "dev": "tsx watch ./src/server.ts watch ./config/**/* --project ./tsconfig.json",
+        "dev": "npm run docker:up && tsx watch ./src/server.ts watch ./config/**/* --project ./tsconfig.json",
         "lint": "eslint --ext .ts,.tsx ./src",
         "lint:fix": "eslint --ext .ts,.tsx ./src --fix",
         "typecheck": "tsc --noEmit"

@@ -1,7 +1,7 @@
-import * as path from 'path'
-
 import fastify, { type FastifyInstance } from 'fastify'
 import config from 'config'
+
+import { router } from './router'
 
 export const loggerConfig = {
     development: {
@@ -26,8 +26,12 @@ export function createServer(): FastifyInstance {
     // Register plugins here 👇🏼
 
     // Register JSON schemas here 👇🏼
+    for (const schema of []) {
+        app.addSchema(schema)
+    }
 
     // Register routes here 👇🏼
+    void app.register(router, { prefix: '/api/v1' })
 
     // Custom error handler here 👇🏼
 
