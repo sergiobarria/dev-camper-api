@@ -12,6 +12,7 @@
         "dev": "npm run docker:up && tsx watch ./src/server.ts watch ./config/**/* --project ./tsconfig.json",
         "lint": "eslint --ext .ts,.tsx ./src",
         "lint:fix": "eslint --ext .ts,.tsx ./src --fix",
+        "format": "prettier --write ./src/**/*",
         "typecheck": "tsc --noEmit"
     },
     "keywords": [],
@@ -41,6 +42,7 @@
         "@types/validator": "^13.7.13",
         "@typescript-eslint/eslint-plugin": "^5.54.1",
         "eslint": "^8.36.0",
+        "eslint-config-prettier": "^8.7.0",
         "eslint-config-standard-with-typescript": "^34.0.0",
         "eslint-plugin-import": "^2.27.5",
         "eslint-plugin-n": "^15.6.1",
