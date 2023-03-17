@@ -10,6 +10,8 @@
         "build": "rimraf dist && swc ./src ./config -d dist",
         "start": "node dist/server.js NODE_ENV=production",
         "dev": "npm run docker:up && tsx watch ./src/server.ts watch ./config/**/* --project ./tsconfig.json",
+        "seed": "tsx ./src/seeder.ts -i",
+        "delete": "tsx ./src/seeder.ts -d",
         "lint": "eslint --ext .ts,.tsx ./src",
         "lint:fix": "eslint --ext .ts,.tsx ./src --fix",
         "format": "prettier --write ./src/**/*",
