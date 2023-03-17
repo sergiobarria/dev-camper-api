@@ -2,6 +2,7 @@ import fastify, { type FastifyInstance } from 'fastify'
 import config from 'config'
 
 import { router } from './router'
+import { bootcampSchemas } from './resources/bootcamps/bootcamps.schemas'
 
 export const loggerConfig = {
     development: {
@@ -26,7 +27,7 @@ export function createServer(): FastifyInstance {
     // Register plugins here 👇🏼
 
     // Register JSON schemas here 👇🏼
-    for (const schema of []) {
+    for (const schema of [...bootcampSchemas]) {
         app.addSchema(schema)
     }
 

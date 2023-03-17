@@ -7,6 +7,7 @@ import {
     updateBootcampHandler,
     deleteBootcampHandler
 } from './bootcamps.controller'
+import { $ref } from './bootcamps.schemas'
 
 /**
  * @desc: Bootcamps routes
@@ -14,13 +15,44 @@ import {
  */
 export async function bootcampsRouter(app: FastifyInstance): Promise<void> {
     // Get all bootcamps
-    app.get('/', getBootcampsHandler)
+    app.get(
+        '/',
+        {
+            schema: {
+                response: {
+                    200: $ref('getBootcampsResponse')
+                }
+            }
+        },
+        getBootcampsHandler
+    )
 
     // Get single bootcamp
-    app.get('/:id', getBootcampHandler)
+    app.get(
+        '/:id',
+        {
+            schema: {
+                response: {
+                    200: $ref('getBootcampResponse')
+                }
+            }
+        },
+        getBootcampHandler
+    )
 
     // Create new bootcamp
-    app.post('/', createBootcampHandler)
+    app.post(
+        '/',
+        {
+            schema: {
+                response: {
+                    201: $ref('createBootcampResponse')
+                },
+                body: $ref('createBootcampSchema')
+            }
+        },
+        createBootcampHandler
+    )
 
     // Update bootcamp
     app.patch('/:id', updateBootcampHandler)

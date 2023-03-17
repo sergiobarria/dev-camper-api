@@ -1,4 +1,8 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
+import httpStatus from 'http-status'
+
+import { Bootcamp } from '@/models/bootcamp.model'
+import type { BootcampInputs } from './bootcamps.schemas'
 
 /**
  * @desc: Get all bootcamps
@@ -6,7 +10,13 @@ import type { FastifyRequest, FastifyReply } from 'fastify'
  * @access: Public
  */
 export async function getBootcampsHandler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    return await reply.send({ message: 'Get all bootcamps' })
+    const bootcamps = await Bootcamp.find()
+
+    return await reply.code(httpStatus.OK).send({
+        success: true,
+        count: bootcamps.length,
+        data: bootcamps
+    })
 }
 
 /**
@@ -14,8 +24,26 @@ export async function getBootcampsHandler(request: FastifyRequest, reply: Fastif
  * @route: GET /bootcamps/:id
  * @access: Public
  */
-export async function getBootcampHandler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    return await reply.send({ message: 'Get single bootcamp' })
+export async function getBootcampHandler(
+    request: FastifyRequest<{ Params: BootcampInputs['params'] }>,
+    reply: FastifyReply
+): Promise<void> {
+    const { id } = request.params
+
+    const bootcamp = await Bootcamp.findById(id)
+
+    if (bootcamp === null) {
+        console.log(`Bootcamp not found with id of ${id}`)
+        return await reply.status(httpStatus.NOT_FOUND).send({
+            success: false,
+            error: 'Bootcamp not found'
+        })
+    }
+
+    return await reply.code(httpStatus.OK).send({
+        success: true,
+        data: bootcamp
+    })
 }
 
 /**
@@ -23,8 +51,19 @@ export async function getBootcampHandler(request: FastifyRequest, reply: Fastify
  * @route: POST /bootcamps
  * @access: Private
  */
-export async function createBootcampHandler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    return await reply.send({ message: 'Create new bootcamp' })
+export async function createBootcampHandler(
+    request: FastifyRequest<{ Body: BootcampInputs['body'] }>,
+    reply: FastifyReply
+): Promise<void> {
+    const { body } = request
+
+    // NOTE: I'm passing the body directly to the model, because I'm already validating the body with a Zod schema in the route handler
+    const bootcamp = await Bootcamp.create(body)
+
+    return await reply.code(httpStatus.CREATED).send({
+        success: true,
+        data: bootcamp
+    })
 }
 
 /**
@@ -32,8 +71,27 @@ export async function createBootcampHandler(request: FastifyRequest, reply: Fast
  * @route: PATCH /bootcamps/:id
  * @access: Private
  */
-export async function updateBootcampHandler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    return await reply.send({ message: 'Update bootcamp' })
+export async function updateBootcampHandler(
+    request: FastifyRequest<{ Body: Partial<BootcampInputs['body']>; Params: BootcampInputs['params'] }>,
+    reply: FastifyReply
+): Promise<void> {
+    const { id } = request.params
+    const { body } = request
+
+    const updatedBootcamp = await Bootcamp.findByIdAndUpdate(id, body, { new: true, runValidators: true })
+
+    if (updatedBootcamp === null) {
+        console.log(`Bootcamp not found with id of ${id}`)
+        return await reply.status(httpStatus.NOT_FOUND).send({
+            success: false,
+            error: 'Bootcamp not found'
+        })
+    }
+
+    return await reply.code(httpStatus.OK).send({
+        success: true,
+        data: updatedBootcamp
+    })
 }
 
 /**
@@ -41,6 +99,16 @@ export async function updateBootcampHandler(request: FastifyRequest, reply: Fast
  * @route: DELETE /bootcamps/:id
  * @access: Private
  */
-export async function deleteBootcampHandler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    return await reply.send({ message: 'Delete bootcamp' })
+export async function deleteBootcampHandler(
+    request: FastifyRequest<{ Params: BootcampInputs['params'] }>,
+    reply: FastifyReply
+): Promise<void> {
+    const { id } = request.params
+
+    await Bootcamp.findByIdAndDelete(id)
+
+    return await reply.code(httpStatus.OK).send({
+        success: true,
+        data: {}
+    })
 }
