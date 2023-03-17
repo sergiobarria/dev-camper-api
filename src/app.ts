@@ -3,6 +3,7 @@ import config from 'config'
 
 import { router } from './router'
 import { bootcampSchemas } from './resources/bootcamps/bootcamps.schemas'
+import { globalErrorHandler } from './resources/error/error.controller'
 
 export const loggerConfig = {
     development: {
@@ -35,6 +36,7 @@ export function createServer(): FastifyInstance {
     void app.register(router, { prefix: '/api/v1' })
 
     // Custom error handler here 👇🏼
+    void app.setErrorHandler(globalErrorHandler)
 
     return app
 }

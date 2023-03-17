@@ -3,6 +3,7 @@ import httpStatus from 'http-status'
 
 import { Bootcamp } from '@/models/bootcamp.model'
 import type { BootcampInputs } from './bootcamps.schemas'
+import { APIError } from '@/utils'
 
 /**
  * @desc: Get all bootcamps
@@ -33,11 +34,7 @@ export async function getBootcampHandler(
     const bootcamp = await Bootcamp.findById(id)
 
     if (bootcamp === null) {
-        console.log(`Bootcamp not found with id of ${id}`)
-        return await reply.status(httpStatus.NOT_FOUND).send({
-            success: false,
-            error: 'Bootcamp not found'
-        })
+        throw APIError.notFound(`Bootcamp not found with id of ${id}`)
     }
 
     return await reply.code(httpStatus.OK).send({
@@ -81,11 +78,7 @@ export async function updateBootcampHandler(
     const updatedBootcamp = await Bootcamp.findByIdAndUpdate(id, body, { new: true, runValidators: true })
 
     if (updatedBootcamp === null) {
-        console.log(`Bootcamp not found with id of ${id}`)
-        return await reply.status(httpStatus.NOT_FOUND).send({
-            success: false,
-            error: 'Bootcamp not found'
-        })
+        throw APIError.notFound(`Bootcamp not found with id of ${id}`)
     }
 
     return await reply.code(httpStatus.OK).send({
@@ -105,7 +98,11 @@ export async function deleteBootcampHandler(
 ): Promise<void> {
     const { id } = request.params
 
-    await Bootcamp.findByIdAndDelete(id)
+    const bootcamp = await Bootcamp.findByIdAndDelete(id)
+
+    if (bootcamp === null) {
+        throw APIError.notFound(`Bootcamp not found with id of ${id}`)
+    }
 
     return await reply.code(httpStatus.OK).send({
         success: true,
