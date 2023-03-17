@@ -2,6 +2,8 @@ import { Schema, model, type Model, type Types, type CallbackError } from 'mongo
 import validator from 'validator'
 import slugify from 'slugify'
 
+import { geocoder } from '@/utils'
+
 export interface IBootcamp {
     name: string
     slug: string
@@ -9,7 +11,7 @@ export interface IBootcamp {
     website: string
     phone: string
     email: string
-    address: string
+    address?: string
     location: {
         type: string
         coordinates: Types.Array<number> // suggested by mongoose to use Types.Array instead of number[]
@@ -61,10 +63,7 @@ const bootcampSchema = new Schema<IBootcamp, BootcampModel, IBootcampMethods>(
             type: String,
             validator: [validator.isEmail, 'Please add a valid email']
         },
-        address: {
-            type: String,
-            required: [true, 'Please add an address']
-        },
+        address: String,
         location: {
             type: {
                 type: String,
@@ -133,6 +132,27 @@ const bootcampSchema = new Schema<IBootcamp, BootcampModel, IBootcampMethods>(
 // Create bootcamp slug from the name
 bootcampSchema.pre(/save/, function (this: IBootcamp, next: (error?: CallbackError) => void) {
     this.slug = slugify(this.name, { lower: true })
+    next()
+})
+
+// Geocode & create location field
+bootcampSchema.pre(/save/, async function (this: IBootcamp, next: (error?: CallbackError) => void) {
+    const loc = await geocoder.geocode(this.address as string)
+
+    this.location = {
+        type: 'Point',
+        coordinates: [loc[0].longitude, loc[0].latitude] as Types.Array<number>,
+        formattedAddress: loc[0].formattedAddress as string,
+        street: loc[0].streetName as string,
+        city: loc[0].city as string,
+        state: loc[0].stateCode as string,
+        zipcode: loc[0].zipcode as string,
+        country: loc[0].countryCode as string
+    }
+
+    // Do not save address in DB
+    this.address = undefined
+
     next()
 })
 
