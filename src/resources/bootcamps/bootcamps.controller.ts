@@ -106,6 +106,6 @@ export async function deleteBootcampHandler(
 
     return await reply.code(httpStatus.OK).send({
         success: true,
-        data: {}
+        data: null
     })
 }

@@ -21,7 +21,21 @@ export const baseBootcampSchema = {
             country: z.string().optional()
         })
         .optional(),
-    careers: z.array(z.string()),
+    careers: z.array(
+        z.enum([
+            'Full-Stack',
+            'Web Development',
+            'Mobile Development',
+            'UI/UX Design',
+            'Coding for Kids',
+            'Cybersecurity',
+            'Data Science',
+            'Business',
+            'Other',
+            'Cloud Infrastructure',
+            'Cloud Architecture'
+        ])
+    ),
     averageRating: z.number().min(1).max(10).optional(),
     averageCost: z.number().optional(),
     photo: z.string().optional(),

@@ -1,5 +1,6 @@
-import { Schema, model, type Model, type Types } from 'mongoose'
+import { Schema, model, type Model, type Types, type CallbackError } from 'mongoose'
 import validator from 'validator'
+import slugify from 'slugify'
 
 export interface IBootcamp {
     name: string
@@ -33,7 +34,7 @@ export interface IBootcampMethods {} // eslint-disable-line @typescript-eslint/n
 
 export type BootcampModel = Model<IBootcamp, unknown, IBootcampMethods>
 
-const BootcampSchema = new Schema<IBootcamp, BootcampModel, IBootcampMethods>(
+const bootcampSchema = new Schema<IBootcamp, BootcampModel, IBootcampMethods>(
     {
         name: {
             type: String,
@@ -129,4 +130,10 @@ const BootcampSchema = new Schema<IBootcamp, BootcampModel, IBootcampMethods>(
     { timestamps: true, versionKey: false }
 )
 
-export const Bootcamp = model<IBootcamp, BootcampModel>('Bootcamp', BootcampSchema)
+// Create bootcamp slug from the name
+bootcampSchema.pre(/save/, function (this: IBootcamp, next: (error?: CallbackError) => void) {
+    this.slug = slugify(this.name, { lower: true })
+    next()
+})
+
+export const Bootcamp = model<IBootcamp, BootcampModel>('Bootcamp', bootcampSchema)
