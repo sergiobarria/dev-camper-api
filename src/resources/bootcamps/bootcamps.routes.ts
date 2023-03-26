@@ -5,7 +5,8 @@ import {
     getBootcampHandler,
     createBootcampHandler,
     updateBootcampHandler,
-    deleteBootcampHandler
+    deleteBootcampHandler,
+    getBootcampsInRadiusHandler
 } from './bootcamps.controller'
 import { $ref } from './bootcamps.schemas'
 
@@ -59,4 +60,7 @@ export async function bootcampsRouter(app: FastifyInstance): Promise<void> {
 
     // Delete bootcamp
     app.delete('/:id', deleteBootcampHandler)
+
+    // Get bootcamps within a radius
+    app.get('/radius/:zipcode/:distance', getBootcampsInRadiusHandler)
 }

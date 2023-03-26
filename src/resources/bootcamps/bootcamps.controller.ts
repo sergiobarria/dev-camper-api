@@ -1,17 +1,26 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
 import httpStatus from 'http-status'
 
-import { Bootcamp } from '@/models/bootcamp.model'
-import type { BootcampInputs } from './bootcamps.schemas'
-import { APIError } from '@/utils'
+import { Bootcamp, BootcampModel, IBootcamp } from '@/models/bootcamp.model'
+import type { BootcampInputs, BootcampWithinRadiusInputs } from './bootcamps.schemas'
+import { APIError, geocoder } from '@/utils'
+import { APIFeatures } from '@/utils/apiFeatures'
+import { Document } from 'mongoose'
 
 /**
  * @desc: Get all bootcamps
  * @route: GET /bootcamps
  * @access: Public
  */
-export async function getBootcampsHandler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-    const bootcamps = await Bootcamp.find()
+export async function getBootcampsHandler(
+    request: FastifyRequest<{ Querystring: Record<string, any> }>,
+    reply: FastifyReply
+): Promise<void> {
+    const queryStr = request.query
+    console.log('queryStr', queryStr)
+
+    const features = new APIFeatures<IBootcamp>(Bootcamp, queryStr)
+    const bootcamps = await features.query
 
     return await reply.code(httpStatus.OK).send({
         success: true,
@@ -107,5 +116,35 @@ export async function deleteBootcampHandler(
     return await reply.code(httpStatus.OK).send({
         success: true,
         data: null
+    })
+}
+
+/**
+ * @desc: Get bootcamps within a radius
+ * @route: GET /bootcamps/radius/:zipcode/:distance
+ * @access: Public
+ */
+export async function getBootcampsInRadiusHandler(
+    request: FastifyRequest<{ Params: BootcampWithinRadiusInputs['params'] }>,
+    reply: FastifyReply
+): Promise<void> {
+    const { zipcode, distance } = request.params
+
+    // Get lat/lng from geocoder
+    const loc = await geocoder.geocode(zipcode)
+    const { latitude, longitude } = loc[0]
+
+    // Calc radius using radians (divide distance by radius of Earth)
+    // Earth Radius = 3,963 mi / 6,378 km
+    const radius = Number(distance) / 3963
+
+    const bootcamps = await Bootcamp.find({
+        location: { $geoWithin: { $centerSphere: [[longitude, latitude], radius] } }
+    })
+
+    return await reply.code(httpStatus.OK).send({
+        success: true,
+        count: bootcamps.length,
+        data: bootcamps
     })
 }

@@ -1,10 +1,10 @@
-import { Schema, model, type Model, type Types, type CallbackError } from 'mongoose'
+import { Schema, model, type Model, type Types, type CallbackError, type Document } from 'mongoose'
 import validator from 'validator'
 import slugify from 'slugify'
 
 import { geocoder } from '@/utils'
 
-export interface IBootcamp {
+export interface IBootcamp extends Document {
     name: string
     slug: string
     description: string

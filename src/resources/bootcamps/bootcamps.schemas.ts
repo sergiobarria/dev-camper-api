@@ -85,8 +85,16 @@ export const getBootcampResponse = z.object({
     })
 })
 
+export const getBootcampWithinRadiusSchema = z.object({
+    params: z.object({
+        zipcode: z.string(),
+        distance: z.string()
+    })
+})
+
 export type CreateBootcampBody = z.infer<typeof createBootcampSchema>
 export type BootcampInputs = z.infer<typeof bootcampSchema>
+export type BootcampWithinRadiusInputs = z.infer<typeof getBootcampWithinRadiusSchema>
 
 export const { schemas: bootcampSchemas, $ref } = buildJsonSchemas({
     createBootcampSchema,
