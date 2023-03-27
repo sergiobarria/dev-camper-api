@@ -1,5 +1,5 @@
 run:
-	@go run ./cmd/api
+	@go run main.go
 
 docker-up:
 	docker-compose up -d
