@@ -14,7 +14,6 @@ var DB *mongo.Client
 
 func ConnectToMongoDB() *mongo.Client {
 	uri := viper.GetString("MONGO_URI")
-	fmt.Println("URI", uri)
 
 	// Use the SetServerAPIOptions() method to set the Stable API version to 1
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
