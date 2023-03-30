@@ -2,27 +2,36 @@ package utils
 
 import (
 	"encoding/json"
-	"errors"
-	"io"
 	"net/http"
 )
 
 type JSONResponse struct {
-	Message string      `json:"message,omitempty"`
+	Success bool        `json:"success,omitempty"`
+	Status  int         `json:"status"`
 	Data    interface{} `json:"data,omitempty"`
 	Error   interface{} `json:"error,omitempty"`
-	Status  string      `json:"status"`
+	Message string      `json:"message,omitempty"`
 }
 
-func SendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}, headers ...http.Header) error {
-	res, err := json.Marshal(data) // Convert data to JSON
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
-		return err
+func NewJSONResponse(w http.ResponseWriter, params map[string]interface{}, headers ...http.Header) {
+	res := JSONResponse{
+		Success: true,
+		Status:  params["status"].(int),
+		Data:    params["data"],
+		Message: params["message"].(string),
+		Error:   params["error"],
 	}
 
-	// Set headers if any are passed in the arguments 👇🏼
+	if v, ok := params["success"]; ok && v != nil {
+		res.Success = v.(bool)
+	}
+
+	respJSON, err := json.Marshal(res)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	if len(headers) > 0 {
 		for k, v := range headers[0] {
 			w.Header().Set(k, v[0])
@@ -30,42 +39,6 @@ func SendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}, h
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	w.Write(res)
-
-	return nil
-}
-
-func ReadJSONBody(w http.ResponseWriter, r *http.Request, data interface{}) error {
-	maxBytes := 1024 * 1024 // 1MB
-	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
-
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields() // Disallow unknown fields in the request body
-	err := decoder.Decode(data)
-	if err != nil {
-		return err
-	}
-
-	// Check there is only one JSON file in the request body
-	err = decoder.Decode(&struct{}{})
-	if err != io.EOF {
-		return errors.New("request body must only contain one JSON object")
-	}
-
-	return nil
-}
-
-func SendJSONError(w http.ResponseWriter, err error, status ...int) error {
-	var payload JSONResponse
-	statusCode := http.StatusBadRequest
-
-	if len(status) > 0 {
-		statusCode = status[0]
-	}
-
-	payload.Status = "error"
-	payload.Error = err.Error()
-
-	return SendJSONResponse(w, statusCode, payload)
+	w.WriteHeader(res.Status)
+	w.Write(respJSON)
 }

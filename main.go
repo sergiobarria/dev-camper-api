@@ -1,19 +1,27 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"log"
+
 	"github.com/sergiobarria/dev-camper-api/api"
-	"github.com/sergiobarria/dev-camper-api/initializers"
+	"github.com/sergiobarria/dev-camper-api/config"
+	"github.com/spf13/viper"
 )
 
 func init() {
-	initializers.LoadEnvVars()      // Load environment variables from .env file
-	initializers.ConnectToMongoDB() // Connect to MongoDB
+	config.LoadEnvVars() // Load environment variables from .env file
 }
 
 func main() {
-	// Create Server
-	server := api.NewServer(initializers.DB)
+	listenAddr := flag.String("port", viper.GetString("PORT"), "Port to listen on")
+	flag.Parse()
 
-	// Start Server
-	server.Run()
+	// Create new server
+	server := api.NewServer(*listenAddr)
+
+	// Run server
+	fmt.Println("🚀 Server running and listening on port:", *listenAddr)
+	log.Fatal(server.Run())
 }

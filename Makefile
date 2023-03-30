@@ -1,5 +1,8 @@
+# Defaults
+PORT?=3000
+
 run:
-	@go run main.go
+	@go run main.go --port=${PORT}
 
 docker-up:
 	docker-compose up -d
