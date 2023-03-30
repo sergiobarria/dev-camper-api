@@ -11,7 +11,8 @@ import (
 )
 
 func init() {
-	config.LoadEnvVars() // Load environment variables from .env file
+	config.LoadEnvVars()      // Load environment variables from .env file
+	config.ConnectToMongoDB() // Connect to MongoDB
 }
 
 func main() {

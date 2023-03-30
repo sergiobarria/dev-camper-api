@@ -7,11 +7,12 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/sergiobarria/dev-camper-api/api/handlers"
+	"github.com/sergiobarria/dev-camper-api/repositories"
 	"github.com/sergiobarria/dev-camper-api/utils"
 	"github.com/spf13/viper"
 )
 
-func RegisterRoutes() *chi.Mux {
+func RegisterRoutes(repo repositories.BootcampRepository) *chi.Mux {
 	debug := viper.GetBool("DEBUG")
 	r := chi.NewRouter()
 
@@ -36,19 +37,21 @@ func RegisterRoutes() *chi.Mux {
 
 	// ====== REGISTER ROUTES ======
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
-		utils.NewJSONResponse(w, map[string]interface{}{
-			// "success": true,
-			"status":  http.StatusOK,
-			"message": "Server is running",
+		utils.NewJSONResponse(w, utils.JSONResponse{
+			Status:  http.StatusOK,
+			Message: "Server is running",
 		})
 	})
 
+	// ====== INSTANTIATE HANDLERS ======
+	bootcampHandlers := handlers.NewBootcampsHandlers(repo)
+
 	// ====== Bootcamps Routes ======
-	r.Get("/bootcamps", handlers.GetBootcamps)
-	r.Post("/bootcamps", handlers.CreateBootcamp)
-	r.Get("/bootcamps/{id}", handlers.GetBootcamp)
-	r.Patch("/bootcamps/{id}", handlers.UpdateBootcamp)
-	r.Delete("/bootcamps/{id}", handlers.DeleteBootcamp)
+	r.Get("/bootcamps", bootcampHandlers.GetBootcamps)
+	r.Post("/bootcamps", bootcampHandlers.CreateBootcamp)
+	r.Get("/bootcamps/{id}", bootcampHandlers.GetBootcamp)
+	r.Patch("/bootcamps/{id}", bootcampHandlers.UpdateBootcamp)
+	r.Delete("/bootcamps/{id}", bootcampHandlers.DeleteBootcamp)
 
 	return r
 }
