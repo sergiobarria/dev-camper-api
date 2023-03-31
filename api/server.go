@@ -21,6 +21,7 @@ type APIServer struct {
 func NewAPIServer(listenAddr string, debug *string) *APIServer {
 	db := config.DB
 
+	// ====== Register Repositories ======
 	bootcampRepo := repositories.NewBootcampRepo(db)
 
 	return &APIServer{
