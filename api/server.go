@@ -1,44 +1,96 @@
 package api
 
 import (
-	"log"
+	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/sergiobarria/dev-camper-api/config"
 	"github.com/sergiobarria/dev-camper-api/repositories"
 	"github.com/spf13/viper"
 )
 
-type Server struct {
+type APIServer struct {
 	listenAddr   string
-	debug        bool
-	infoLog      *log.Logger
-	errLog       *log.Logger
-	bootcampRepo repositories.BootcampRepository
+	debug        *string
+	bootcampRepo repositories.BootcampRepo
 }
 
-func NewServer(listenAddr string) *Server {
+func NewAPIServer(listenAddr string, debug *string) *APIServer {
 	db := config.DB
 
-	// Instantiate repositories
 	bootcampRepo := repositories.NewBootcampRepo(db)
 
-	return &Server{
+	return &APIServer{
 		listenAddr:   listenAddr,
-		debug:        viper.GetBool("DEBUG"),
-		infoLog:      log.New(os.Stdout, "INFO\t", log.Ltime|log.Ldate|log.Lshortfile),
-		errLog:       log.New(os.Stderr, "ERROR\t", log.Ltime|log.Ldate|log.Llongfile),
+		debug:        debug,
 		bootcampRepo: bootcampRepo,
 	}
 }
 
-func (s *Server) Run() error {
-	r := chi.NewRouter()
+func (s *APIServer) Run() error {
+	debug := viper.GetBool("DEBUG")
+	router := chi.NewRouter()
 
-	// ====== Register routes ======
-	r.Mount("/api/v1", RegisterRoutes(s.bootcampRepo))
+	// ====== APPLY MIDDLEWARES ======
+	router.Use(middleware.RequestID)
+	router.Use(middleware.RealIP)
+	if debug {
+		router.Use(middleware.Logger) // logger must go before recoverer
+	}
+	router.Use(middleware.Recoverer)
 
-	return http.ListenAndServe(":"+s.listenAddr, r)
+	router.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"https://*", "http://*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
+
+	// ====== REGISTER ROUTES ======
+	router.Mount("/api/v1", s.RegisterRoutes())
+
+	return http.ListenAndServe(":"+s.listenAddr, router)
+}
+
+func (s *APIServer) RegisterRoutes() http.Handler {
+	router := chi.NewRouter()
+
+	// Healtheck Route
+	router.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
+		SendJSONResponse(w, http.StatusOK, JSONResponse{
+			Status:  true,
+			Message: "DevCamper API v1.0.0 - Status: OK",
+		})
+	})
+
+	// ====== Bootcamps Routes ======
+	router.Get("/bootcamps", s.HandleGetBootcamps)
+	router.Post("/bootcamps", s.HandleCreateBootcamp)
+	router.Get("/bootcamps/{id}", s.HandleGetBootcamp)
+	router.Patch("/bootcamps/{id}", s.HandleUpdateBootcamp)
+	router.Delete("/bootcamps/{id}", s.HandleDeleteBootcamp)
+
+	// ====== Other Routes ======
+	router.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
+		SendJSONResponse(w, http.StatusMethodNotAllowed, JSONResponse{
+			Status:  false,
+			Message: fmt.Sprintf("Method %s not allowed", r.Method),
+		})
+	})
+
+	router.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		SendJSONResponse(w, http.StatusNotFound, JSONResponse{
+			Status:  false,
+			Message: "Route not found on this server",
+		})
+	})
+
+	return router
 }

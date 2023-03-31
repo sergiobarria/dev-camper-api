@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/fatih/color"
 	"github.com/sergiobarria/dev-camper-api/api"
 	"github.com/sergiobarria/dev-camper-api/config"
 	"github.com/spf13/viper"
@@ -17,12 +18,18 @@ func init() {
 
 func main() {
 	listenAddr := flag.String("port", viper.GetString("PORT"), "Port to listen on")
+	debug := flag.String("debug", viper.GetString("DEBUG"), "Debug mode")
 	flag.Parse()
 
-	// Create new server
-	server := api.NewServer(*listenAddr)
+	server := api.NewAPIServer(*listenAddr, debug)
+	mode := "debug"
+	if *debug == "false" {
+		mode = "production"
+	}
+	c := color.New(color.FgGreen, color.Bold, color.Underline)
+	modeStr := c.Sprintf(mode)
+	addrStr := c.Sprintf(*listenAddr)
 
-	// Run server
-	fmt.Println("🚀 Server running and listening on port:", *listenAddr)
+	fmt.Printf("🚀 Server running in %s mode on port %s \n", modeStr, addrStr)
 	log.Fatal(server.Run())
 }
