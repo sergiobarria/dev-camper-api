@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -12,8 +13,7 @@ import (
 )
 
 func init() {
-	config.LoadEnvVars()      // Load environment variables from .env file
-	config.ConnectToMongoDB() // Connect to MongoDB
+	config.LoadEnvVars() // Load environment variables from .env file
 }
 
 func main() {
@@ -21,7 +21,12 @@ func main() {
 	debug := flag.String("debug", viper.GetString("DEBUG"), "Debug mode")
 	flag.Parse()
 
-	server := api.NewAPIServer(*listenAddr, debug)
+	// Connect to MongoDB
+	client := config.NewMongoClient()
+	defer client.Disconnect(context.Background())
+
+	// Create new API Instance
+	server := api.NewAPIServer(*listenAddr, debug, client)
 	mode := "debug"
 	if *debug == "false" {
 		mode = "production"

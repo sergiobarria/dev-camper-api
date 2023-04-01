@@ -8,14 +8,14 @@ import (
 )
 
 type JSONResponse struct {
-	Status  bool        `json:"success"`
+	Success bool        `json:"success"`
 	Message string      `json:"message,omitempty"`
 	Data    interface{} `json:"data,omitempty"`
-	Error   string      `json:"error,omitempty"`
+	Error   *APIError   `json:"error,omitempty"`
 }
 
 type APIError struct {
-	Error string `json:"error"`
+	Error string `json:"error,omitempty"`
 }
 
 func SendJSONResponse(w http.ResponseWriter, status int, data interface{}, headers ...http.Header) error {
@@ -47,4 +47,11 @@ func ParseJSONBody(w http.ResponseWriter, r *http.Request, data interface{}) err
 	}
 
 	return nil
+}
+
+func SendJSONError(w http.ResponseWriter, status int, err error) error {
+	return SendJSONResponse(w, status, JSONResponse{
+		Success: false,
+		Error:   &APIError{Error: err.Error()},
+	})
 }

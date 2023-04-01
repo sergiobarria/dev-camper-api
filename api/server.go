@@ -7,9 +7,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/sergiobarria/dev-camper-api/config"
 	"github.com/sergiobarria/dev-camper-api/repositories"
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type APIServer struct {
@@ -18,11 +18,9 @@ type APIServer struct {
 	bootcampRepo repositories.BootcampRepo
 }
 
-func NewAPIServer(listenAddr string, debug *string) *APIServer {
-	db := config.DB
-
+func NewAPIServer(listenAddr string, debug *string, client *mongo.Client) *APIServer {
 	// ====== Register Repositories ======
-	bootcampRepo := repositories.NewBootcampRepo(db)
+	bootcampRepo := repositories.NewBootcampRepo(client)
 
 	return &APIServer{
 		listenAddr:   listenAddr,
@@ -42,6 +40,8 @@ func (s *APIServer) Run() error {
 		router.Use(middleware.Logger) // logger must go before recoverer
 	}
 	router.Use(middleware.Recoverer)
+
+	// TODO: Add globalErrorHandler middleware here 👇🏼
 
 	router.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
@@ -66,7 +66,7 @@ func (s *APIServer) RegisterRoutes() http.Handler {
 	// Healtheck Route
 	router.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		SendJSONResponse(w, http.StatusOK, JSONResponse{
-			Status:  true,
+			Success: true,
 			Message: "DevCamper API v1.0.0 - Status: OK",
 		})
 	})
@@ -81,14 +81,14 @@ func (s *APIServer) RegisterRoutes() http.Handler {
 	// ====== Other Routes ======
 	router.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
 		SendJSONResponse(w, http.StatusMethodNotAllowed, JSONResponse{
-			Status:  false,
+			Success: false,
 			Message: fmt.Sprintf("Method %s not allowed", r.Method),
 		})
 	})
 
 	router.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		SendJSONResponse(w, http.StatusNotFound, JSONResponse{
-			Status:  false,
+			Success: false,
 			Message: "Route not found on this server",
 		})
 	})

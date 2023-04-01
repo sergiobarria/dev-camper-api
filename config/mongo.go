@@ -10,9 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var DB *mongo.Client
+var DB *mongo.Client // this is not used in the project, but it's a good example of how to use the mongo client as a global variable
 
-func ConnectToMongoDB() *mongo.Client {
+func NewMongoClient() *mongo.Client {
 	uri := viper.GetString("MONGO_URI")
 	db := viper.GetString("DATABASE")
 
@@ -23,19 +23,17 @@ func ConnectToMongoDB() *mongo.Client {
 	if err != nil {
 		panic(err)
 	}
-	defer func() {
-		if err = client.Disconnect(context.TODO()); err != nil {
-			panic(err)
-		}
-	}()
 
 	var result bson.M
-	if err := client.Database(db).RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Decode(&result); err != nil {
+	if err := client.Database(db).RunCommand(context.Background(), bson.D{{Key: "ping", Value: 1}}).Decode(&result); err != nil {
 		panic(err)
 	}
 
 	fmt.Println("Successfully connected to MongoDB")
 
-	DB = client
 	return client
+}
+
+func GetCollection(client *mongo.Client, coll string) *mongo.Collection {
+	return client.Database(viper.GetString("DATABASE")).Collection(coll)
 }
