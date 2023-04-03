@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sergiobarria/dev-camper-api/helpers"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -43,7 +42,7 @@ var coll string = "bootcamps"
 
 // ===== Model Funcs here 👇🏼 =====
 func (m *BootcampModel) InsertOne(b *Bootcamp) error {
-	b.Slug = helpers.Slugify(b.Name)
+	// b.Slug = helpers.Slugify(b.Name)
 	b.CreatedAt = time.Now()
 	b.UpdatedAt = time.Now()
 
