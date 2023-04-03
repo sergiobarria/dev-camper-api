@@ -12,7 +12,6 @@ import (
 )
 
 type APIServer struct {
-	// app        *echo.Echo
 	listenAddr *string
 	debug      *bool
 	client     *mongo.Client
@@ -20,16 +19,11 @@ type APIServer struct {
 }
 
 func NewAPIServer(listendAddr *string, debug *bool, client *mongo.Client) *APIServer {
-
-	// ====== REGISTER ROUTES ======
-	// s.RegisterRoutes(app)
-
 	return &APIServer{
 		listenAddr: listendAddr,
 		debug:      debug,
 		client:     client,
-		// app:        app,
-		models: models.NewModels(client.Database(config.EnvVars.MONGO_DB)),
+		models:     models.NewModels(client.Database(config.EnvVars.MONGO_DB)),
 	}
 }
 
