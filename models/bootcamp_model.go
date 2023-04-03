@@ -1,9 +1,11 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Bootcamp struct {
@@ -27,4 +29,14 @@ type Bootcamp struct {
 type Location struct {
 }
 
+type BootcampModel struct {
+	db *mongo.Database
+}
+
 // ===== Validate model here 👇🏼 =====
+
+// ===== Model Funcs here 👇🏼 =====
+func (m *BootcampModel) FindAll() ([]Bootcamp, error) {
+	fmt.Println("FindAll called")
+	return nil, nil
+}

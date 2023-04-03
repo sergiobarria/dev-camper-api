@@ -2,96 +2,61 @@ package api
 
 import (
 	"fmt"
-	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
-	"github.com/sergiobarria/dev-camper-api/repositories"
-	"github.com/spf13/viper"
+	"github.com/fatih/color"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/sergiobarria/dev-camper-api/config"
+	"github.com/sergiobarria/dev-camper-api/models"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type APIServer struct {
-	listenAddr   string
-	debug        *string
-	bootcampRepo repositories.BootcampRepo
+	// app        *echo.Echo
+	listenAddr *string
+	debug      *bool
+	client     *mongo.Client
+	models     models.Models
 }
 
-func NewAPIServer(listenAddr string, debug *string, client *mongo.Client) *APIServer {
-	// ====== Register Repositories ======
-	bootcampRepo := repositories.NewBootcampRepo(client)
+func NewAPIServer(listendAddr *string, debug *bool, client *mongo.Client) *APIServer {
+
+	// ====== REGISTER ROUTES ======
+	// s.RegisterRoutes(app)
 
 	return &APIServer{
-		listenAddr:   listenAddr,
-		debug:        debug,
-		bootcampRepo: bootcampRepo,
+		listenAddr: listendAddr,
+		debug:      debug,
+		client:     client,
+		// app:        app,
+		models: models.NewModels(client.Database(config.EnvVars.MONGO_DB)),
 	}
 }
 
 func (s *APIServer) Run() error {
-	debug := viper.GetBool("DEBUG")
-	router := chi.NewRouter()
+	app := echo.New()
+	app.HideBanner = true
+	app.HidePort = true
 
-	// ====== APPLY MIDDLEWARES ======
-	router.Use(middleware.RequestID)
-	router.Use(middleware.RealIP)
-	if debug {
-		router.Use(middleware.Logger) // logger must go before recoverer
+	// ====== MIDDLEWARE ======
+	if *s.debug {
+		app.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+			Format: "method=${method}, uri=${uri}, status=${status}\n",
+		}))
 	}
-	router.Use(middleware.Recoverer)
-
-	// TODO: Add globalErrorHandler middleware here 👇🏼
-
-	router.Use(cors.Handler(cors.Options{
-		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins: []string{"https://*", "http://*"},
-		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
-	}))
+	app.Use(middleware.Recover())
 
 	// ====== REGISTER ROUTES ======
-	router.Mount("/api/v1", s.RegisterRoutes())
+	s.RegisterRoutes(app)
 
-	return http.ListenAndServe(":"+s.listenAddr, router)
-}
+	mode := "development"
+	if !*s.debug {
+		mode = "production"
+	}
+	c := color.New(color.FgGreen, color.Bold, color.Underline)
+	modeStr := c.Sprintf(mode)
+	addrStr := c.Sprintf(":" + *s.listenAddr)
 
-func (s *APIServer) RegisterRoutes() http.Handler {
-	router := chi.NewRouter()
-
-	// Healtheck Route
-	router.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
-		SendJSONResponse(w, http.StatusOK, JSONResponse{
-			Success: true,
-			Message: "DevCamper API v1.0.0 - Status: OK",
-		})
-	})
-
-	// ====== Bootcamps Routes ======
-	router.Get("/bootcamps", s.HandleGetBootcamps)
-	router.Post("/bootcamps", s.HandleCreateBootcamp)
-	router.Get("/bootcamps/{id}", s.HandleGetBootcamp)
-	router.Patch("/bootcamps/{id}", s.HandleUpdateBootcamp)
-	router.Delete("/bootcamps/{id}", s.HandleDeleteBootcamp)
-
-	// ====== Other Routes ======
-	router.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-		SendJSONResponse(w, http.StatusMethodNotAllowed, JSONResponse{
-			Success: false,
-			Message: fmt.Sprintf("Method %s not allowed", r.Method),
-		})
-	})
-
-	router.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		SendJSONResponse(w, http.StatusNotFound, JSONResponse{
-			Success: false,
-			Message: "Route not found on this server",
-		})
-	})
-
-	return router
+	fmt.Printf("⇨ 🚀 Http server running in %s mode on port %s \n", modeStr, addrStr)
+	return app.Start(fmt.Sprintf(":%s", *s.listenAddr))
 }
