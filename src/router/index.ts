@@ -1,5 +1,7 @@
 import express, { type Request, type Response } from 'express'
 
+import { bootcampsRouter } from './bootcamps/bootcamps.routes'
+
 const router = express.Router()
 
 router.get('/healthcheck', (_: Request, res: Response) => {
@@ -14,5 +16,7 @@ router.get('/healthcheck', (_: Request, res: Response) => {
         },
     })
 })
+
+router.use('/bootcamps', bootcampsRouter)
 
 export { router }
