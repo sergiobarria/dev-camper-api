@@ -6,7 +6,15 @@ import { APIError, prisma } from '@/lib'
 import type { CreateBootcampType, GetBootcampType } from './bootcamps.schemas'
 
 export const createBootcamp = asyncHandler(
-    async (req: Request<any, any, CreateBootcampType>, res: Response) => {
+    async (req: Request<any, any, CreateBootcampType>, res: Response, next: NextFunction) => {
+        const record = await prisma.bootcamps.findFirst({
+            where: { name: req.body.name },
+        })
+
+        if (record !== null) {
+            return next(APIError.conflict('bootcamp with that name already exists'))
+        }
+
         const bootcamp = await prisma.bootcamps.create({
             data: { ...req.body },
         })

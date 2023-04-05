@@ -2,8 +2,8 @@ import express, { type Request, type Response, type NextFunction } from 'express
 import config from 'config'
 
 import { router } from './router'
-import { globalErrorHandler, morganMiddleware } from './middleware'
-import { APIError } from './lib'
+import { globalErrorHandler, morganMiddleware, bootcampMiddleware } from './middleware'
+import { APIError, prisma } from './lib'
 
 export const app = express()
 const env = config.get('NODE_ENV')
@@ -24,3 +24,6 @@ app.all('*', (req: Request, _: Response, next: NextFunction) => {
 
 // ===== Apply error handlers 👇🏼 =====
 app.use(globalErrorHandler)
+
+// ===== Register Prisma middleware 👇🏼 =====
+prisma.$use(bootcampMiddleware)
