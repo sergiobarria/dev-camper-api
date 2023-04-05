@@ -11,7 +11,7 @@ module.exports = {
         sourceType: 'module',
         tsconfigRootDir: __dirname,
     },
-    ignorePatterns: ['config/**/*.ts'], // Ignore config files
+    ignorePatterns: ['config/**/*.ts', 'prisma/**/*.ts'], // Ignore config files
     rules: {
         '@typescript-eslint/restrict-template-expressions': 'off',
         '@typescript-eslint/no-confusing-void-expression': 'off',
