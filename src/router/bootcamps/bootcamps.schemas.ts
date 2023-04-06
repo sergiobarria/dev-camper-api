@@ -107,7 +107,20 @@ export const getBootcampsSchema = z.object({
     }),
 })
 
+export const getBootcampsInRadiusSchema = z.object({
+    params: z.object({
+        zipcode: z.string({
+            required_error: 'zipcode is required',
+        }),
+        distance: z.string({
+            required_error: 'distance is required',
+        }),
+        unit: z.string().optional(),
+    }),
+})
+
 export type CreateBootcampType = z.infer<typeof createBootcampSchema>['body']
 export type GetBootcampType = z.infer<typeof getBootcampSchema>['params']
 export type UpdateBootcampType = z.infer<typeof updateBootcampSchema>['body']
 export type GetBootcampsQueryType = z.infer<typeof getBootcampsSchema>['query']
+export type GetBootcampsInRadiusType = z.infer<typeof getBootcampsInRadiusSchema>['params']

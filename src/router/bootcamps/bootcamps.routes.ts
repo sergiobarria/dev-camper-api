@@ -6,6 +6,8 @@ import { createBootcampSchema, getBootcampSchema, updateBootcampSchema } from '.
 
 const router = express.Router()
 
+router.route('/radius/:zipcode/:distance').get(bcController.getBootcampsInRadius)
+
 router
     .route('/')
     .get(bcController.getBootcamps)

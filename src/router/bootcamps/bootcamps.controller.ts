@@ -2,11 +2,12 @@ import type { NextFunction, Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
 import httpStatus from 'http-status'
 
-import { APIError } from '@/lib'
+import { APIError, geocoder, prisma } from '@/lib'
 import * as services from './bootcamps.services'
 import type {
     CreateBootcampType,
     GetBootcampType,
+    GetBootcampsInRadiusType,
     GetBootcampsQueryType,
 } from './bootcamps.schemas'
 
@@ -86,3 +87,38 @@ export const deleteBootcamp = asyncHandler(async (req: Request<GetBootcampType>,
         message: 'bootcamp deleted',
     })
 })
+
+/**
+ * @desc    Get bootcamps within a radius
+ * @route   GET /api/v1/bootcamps/radius/:zipcode/:distance/:unit
+ */
+export const getBootcampsInRadius = asyncHandler(
+    async (req: Request<GetBootcampsInRadiusType>, res: Response) => {
+        const { zipcode, distance, unit = 'mi' } = req.params
+
+        // Get lat/lng from geocoder
+        const loc = await geocoder.geocode(zipcode)
+        const { latitude, longitude } = loc[0]
+
+        // Calc radius using radians
+        // Divide dist by radius of Earth - Earth Radius = 3,963 mi / 6,378 km
+        const radius = unit === 'mi' ? Number(distance) / 3963 : Number(distance) / 6378
+
+        const bootcamps = await prisma.bootcamps.findRaw({
+            filter: {
+                location: {
+                    $geoWithin: {
+                        $centerSphere: [[longitude, latitude], radius] as [number[], number],
+                    },
+                },
+            },
+        })
+
+        res.status(httpStatus.OK).json({
+            success: true,
+            message: 'bootcamps retrieved',
+            results: bootcamps.length,
+            data: bootcamps,
+        })
+    }
+)
