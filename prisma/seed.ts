@@ -1,20 +1,28 @@
+import * as fs from 'fs'
+import * as path from 'path'
+
 import { PrismaClient } from '@prisma/client'
 import chalk from 'chalk'
 
+import { bootcampMiddleware } from '../src/middleware/prisma.middleware'
+
 const prisma = new PrismaClient()
 
+const bootcamps = JSON.parse(
+    fs.readFileSync(path.join(__dirname, '../_data/bootcamps.json'), 'utf-8')
+)
+
 async function main() {
+    prisma.$use(bootcampMiddleware)
+
     console.log(chalk.greenBright.bold.underline('⇨ 🌱 Seeding database...'))
+    console.log(chalk.yellowBright.bold.underline('⇨ 🗑️ Deleting old bootcamps...'))
+    await prisma.bootcamps.deleteMany()
 
-    const bootcamp = await prisma.bootcamps.create({
-        data: {
-            name: 'Devworks Bootcamp',
-            description: 'The best coding bootcamp in the country',
-        },
-    })
-
-    console.log(chalk.greenBright.bold(`⇨ ✅ Created bootcamp: ${bootcamp.name}`))
-    // console.log(chalk.greenBright.bold.underline('⇨ 🌱 Creating courses...'))
+    for (const b of bootcamps) {
+        await prisma.bootcamps.create({ data: { ...b } })
+        console.log(chalk.greenBright.bold(`⇨ ✅ Created bootcamp: ${b.name}`))
+    }
 }
 
 main()

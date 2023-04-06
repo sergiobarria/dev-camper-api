@@ -63,7 +63,7 @@
         "winston": "^3.8.2"
     },
     "prisma": {
-        "seed": "ts-node prisma/seed.ts"
+        "seed": "ts-node prisma/seed.ts -P ./tsconfig.json"
     },
     "lint-staged": {
         "*.{js,ts}": [

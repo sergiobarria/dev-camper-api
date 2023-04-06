@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client'
 import slugify from 'slugify'
 
-import { geocoder } from '@/lib'
+import { geocoder } from '../lib'
 
 // This file includes all the middleware functions applied to the prisma client
 type PrismaNextFunc = (params: Prisma.MiddlewareParams) => Promise<any>
