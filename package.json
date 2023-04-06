@@ -9,8 +9,14 @@
         "build": "rimraf dist && swc ./src ./config -d dist",
         "dev": "tsx watch ./src/server.ts watch ./config/**/* --project ./tsconfig.json",
         "start": "node dist/server.js NODE_ENV=production",
+        "lint": "eslint ./src --ext .ts",
+        "lint:fix": "eslint ./src --ext .ts --fix",
+        "format": "prettier --write ./src/**/*",
+        "typecheck": "tsc --noEmit --project ./tsconfig.json",
         "generate": "npx prisma generate",
-        "seed": "npx prisma db seed"
+        "seed": "npx prisma db seed",
+        "prepare": "husky install",
+        "lint-staged": "lint-staged"
     },
     "dependencies": {
         "@prisma/client": "^4.12.0",
@@ -46,6 +52,8 @@
         "eslint-plugin-import": "^2.25.2",
         "eslint-plugin-n": "^15.0.0",
         "eslint-plugin-promise": "^6.0.0",
+        "husky": "^8.0.3",
+        "lint-staged": "^13.2.0",
         "prettier": "^2.8.7",
         "prisma": "^4.12.0",
         "rimraf": "^4.4.1",
@@ -56,5 +64,12 @@
     },
     "prisma": {
         "seed": "ts-node prisma/seed.ts"
+    },
+    "lint-staged": {
+        "*.{js,ts}": [
+            "yarn lint:fix",
+            "yarn format",
+            "yarn typecheck"
+        ]
     }
 }
