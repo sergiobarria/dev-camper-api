@@ -93,6 +93,21 @@ export const getBootcampSchema = z.object({
     }),
 })
 
+export const getBootcampsSchema = z.object({
+    query: z.object({
+        page: z.string().optional(),
+        limit: z.string().optional(),
+        sort: z.string().optional(),
+        fields: z.string().optional(),
+        name: z.string().optional(),
+        housing: z.boolean().optional(),
+        jobAssistance: z.boolean().optional(),
+        jobGuarantee: z.boolean().optional(),
+        acceptGi: z.boolean().optional(),
+    }),
+})
+
 export type CreateBootcampType = z.infer<typeof createBootcampSchema>['body']
 export type GetBootcampType = z.infer<typeof getBootcampSchema>['params']
 export type UpdateBootcampType = z.infer<typeof updateBootcampSchema>['body']
+export type GetBootcampsQueryType = z.infer<typeof getBootcampsSchema>['query']
