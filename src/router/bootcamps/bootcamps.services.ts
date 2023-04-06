@@ -21,7 +21,7 @@ export const findMany = async (): Promise<bootcamps[]> => {
 }
 
 export const findOneById = async (id: string): Promise<bootcamps | null> => {
-    const record = prisma.bootcamps.findUnique({ where: { id } })
+    const record = await prisma.bootcamps.findUnique({ where: { id } })
 
     return record
 }
