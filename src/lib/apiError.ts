@@ -39,7 +39,6 @@ export class APIError extends Error {
     }
 
     static conflict(message: string): APIError {
-        console.log('conflict message, ', message)
         return new APIError(message, ErrorStatus.Fail, httpStatus.CONFLICT)
     }
 
