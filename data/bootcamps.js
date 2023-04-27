@@ -11,7 +11,7 @@ export const bootcamps = [
         housing: false,
         jobAssistance: true,
         jobGuarantee: false,
-        acceptGi: true
+        acceptGi: true,
     },
     {
         name: 'DataCrush Bootcamp',
@@ -25,7 +25,7 @@ export const bootcamps = [
         housing: true,
         jobAssistance: true,
         jobGuarantee: true,
-        acceptGi: false
+        acceptGi: false,
     },
     {
         name: 'DesignWorks Bootcamp',
@@ -39,7 +39,7 @@ export const bootcamps = [
         housing: false,
         jobAssistance: true,
         jobGuarantee: false,
-        acceptGi: true
+        acceptGi: true,
     },
     {
         name: 'CodeNinjas Bootcamp',
@@ -53,7 +53,7 @@ export const bootcamps = [
         housing: false,
         jobAssistance: false,
         jobGuarantee: false,
-        acceptGi: false
+        acceptGi: false,
     },
     {
         name: 'CyberHawks Bootcamp',
@@ -67,7 +67,7 @@ export const bootcamps = [
         housing: true,
         jobAssistance: true,
         jobGuarantee: false,
-        acceptGi: true
+        acceptGi: true,
     },
     {
         name: 'CloudMaster Bootcamp',
@@ -81,7 +81,7 @@ export const bootcamps = [
         housing: true,
         jobAssistance: true,
         jobGuarantee: true,
-        acceptGi: true
+        acceptGi: true,
     },
     {
         name: 'MobileMakers Bootcamp',
@@ -95,7 +95,7 @@ export const bootcamps = [
         housing: false,
         jobAssistance: true,
         jobGuarantee: false,
-        acceptGi: true
+        acceptGi: true,
     },
     {
         name: 'CodeHeroes Bootcamp',
@@ -109,7 +109,7 @@ export const bootcamps = [
         housing: true,
         jobAssistance: true,
         jobGuarantee: false,
-        acceptGi: false
+        acceptGi: false,
     },
     {
         name: 'CyberWarriors Bootcamp',
@@ -123,7 +123,7 @@ export const bootcamps = [
         housing: false,
         jobAssistance: true,
         jobGuarantee: true,
-        acceptGi: true
+        acceptGi: true,
     },
     {
         name: 'DataDriven Bootcamp',
@@ -137,6 +137,6 @@ export const bootcamps = [
         housing: false,
         jobAssistance: true,
         jobGuarantee: false,
-        acceptGi: false
-    }
+        acceptGi: false,
+    },
 ]
