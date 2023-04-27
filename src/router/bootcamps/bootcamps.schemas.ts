@@ -104,6 +104,9 @@ export const getBootcampsSchema = z.object({
         jobAssistance: z.boolean().optional(),
         jobGuarantee: z.boolean().optional(),
         acceptGi: z.boolean().optional(),
+        location: z.object({
+            state: z.string().optional(),
+        }),
     }),
 })
 

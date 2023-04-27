@@ -14,8 +14,8 @@ export const findFirst = async (filter: Prisma.bootcampsWhereInput): Promise<boo
     return record
 }
 
-export const findMany = async (): Promise<bootcamps[]> => {
-    const records = await prisma.bootcamps.findMany()
+export const findMany = async (filter?: Prisma.bootcampsFindManyArgs): Promise<bootcamps[]> => {
+    const records = await prisma.bootcamps.findMany(filter)
 
     return records
 }
