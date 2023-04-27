@@ -10,6 +10,7 @@ import type {
     GetBootcampsInRadiusType,
     GetBootcampsQueryType,
 } from './bootcamps.schemas'
+import { type Prisma } from '@prisma/client'
 
 export const createBootcamp = asyncHandler(
     async (req: Request<any, any, CreateBootcampType>, res: Response, next: NextFunction) => {
@@ -29,12 +30,40 @@ export const createBootcamp = asyncHandler(
     }
 )
 
+function mapQueryToWhere(query: GetBootcampsQueryType): Prisma.bootcampsWhereInput {
+    const where: Prisma.bootcampsWhereInput = {}
+    where.AND = []
+
+    for (const [key, value] of Object.entries(query)) {
+        if (value !== undefined) {
+            switch (key) {
+                case 'name':
+                    where.AND.push({ name: { contains: query.name } })
+                    break
+                case 'housing':
+                case 'jobAssistance':
+                case 'jobGuarantee':
+                case 'acceptGi':
+                    where.AND.push({ [key]: value === 'true' })
+                    break
+                default:
+                    break
+            }
+        }
+    }
+
+    return where
+}
+
 export const getBootcamps = asyncHandler(
     async (req: Request<any, any, any, GetBootcampsQueryType>, res: Response) => {
-        // const { fields, sort, limit = 0, page, name, housing } = req.query
-        // console.log({ fields, sort, limit, page, name, housing })
+        console.log({ query: req.query })
+        const where = mapQueryToWhere(req.query)
+        console.log({ where })
 
-        const bootcamps = await services.findMany()
+        const bootcamps = await services.findMany({
+            where,
+        })
 
         res.status(httpStatus.OK).json({
             success: true,
